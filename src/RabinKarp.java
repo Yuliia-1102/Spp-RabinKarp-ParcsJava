@@ -7,6 +7,10 @@ public class RabinKarp implements AM {
     public void run(AMInfo info) {
         Chunk task = (Chunk) info.parent.readObject(); // воркер читає дані
 
+        System.out.println(
+                "Worker started. Chunk length = " + task.textChunk.length()
+        );
+
         Result res = new Result();
         List<Integer> local = rabinKarpAll(task.textChunk, task.pattern);
 
