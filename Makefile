@@ -16,4 +16,4 @@ out/RabinKarp.jar: out/parcs.jar src/RabinKarp.java src/Chunk.java src/Result.ja
 build: out/Main.jar out/RabinKarp.jar
 
 run: out/Main.jar out/RabinKarp.jar
-	@cd out && java -cp 'parcs.jar:Main.jar' Main input 2
+	@cd out && java -cp 'parcs.jar:Main.jar' Main input2.txt 1
