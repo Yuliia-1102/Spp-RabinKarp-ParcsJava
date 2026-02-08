@@ -16,7 +16,6 @@ public class RabinKarp implements AM {
                 res.add(globalPos);
             }
         }
-
         info.parent.write(res); // воркер відправляє дані
     }
 
