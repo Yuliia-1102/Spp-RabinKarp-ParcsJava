@@ -7,20 +7,22 @@ import java.util.*;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        if (args.length < 2) {
-            System.out.println("Please specify: <text_file> <workers>.");
+        if (args.length < 3) {
+            System.out.println("Please specify: <input_file> <output_file> <workers>.");
             return;
         }
 
-        String filename = args[0];
-        int workers = Integer.parseInt(args[1]);
+        String inputFile = args[0];
+        String outputFile = args[1];
+        int workers = Integer.parseInt(args[2]);
         int maxAvailableDaemons = 10;
 
-        List<String> lines = Files.readAllLines(Path.of(filename));
+        List<String> lines = Files.readAllLines(Path.of(inputFile));
         List<String> strings = new ArrayList<>();
         for (String l : lines) strings.add(l.strip());
 
         if (strings.isEmpty()) {
+            Files.writeString(Path.of(outputFile), "");
             System.out.println("Empty input file.");
             return;
         }
@@ -29,6 +31,7 @@ public class Main {
         List<String> patterns = strings.subList(0, strings.size() - 1);
 
         if (patterns.isEmpty()) {
+            Files.writeString(Path.of(outputFile), "");
             System.out.println("No patterns to search.");
             return;
         }
@@ -70,25 +73,25 @@ public class Main {
 
         long endTime = System.nanoTime();
         double timeParallel = (endTime - startTime) / 1e9;
-        System.out.println("Time with " + workers + " workers: " + timeParallel + " sec.\n");
+        System.out.println("Time with " + workers + " workers: " + timeParallel + " sec.");
 
-        if (allResults.isEmpty()) {
-            System.out.println("No matches.");
-        } else {
-            for (PatternResult pr : allResults) {
-                System.out.println("Pattern: " + pr.pattern);
-                System.out.print("Occurrence indexes: ");
-                if (pr.indexes.isEmpty()) {
-                    System.out.print("none");
-                } else {
-                    for (int i = 0; i < pr.indexes.size(); i++) {
-                        if (i > 0) System.out.print(", ");
-                        System.out.print(pr.indexes.get(i));
-                    }
+        StringBuilder sb = new StringBuilder();
+        for (PatternResult pr : allResults) {
+            sb.append("Pattern: ").append(pr.pattern).append("\n");
+            sb.append("Occurrence indexes: ");
+
+            if (pr.indexes == null || pr.indexes.isEmpty()) {
+                sb.append("none");
+            } else {
+                for (int i = 0; i < pr.indexes.size(); i++) {
+                    if (i > 0) sb.append(", ");
+                    sb.append(pr.indexes.get(i));
                 }
-                System.out.println("\n");
             }
+            sb.append("\n\n");
         }
+
+        Files.writeString(Path.of(outputFile), sb.toString());
 
         curtask.end();
     }
