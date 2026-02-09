@@ -1,63 +1,64 @@
 import parcs.*;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RabinKarp implements AM {
 
-    @Override
     public void run(AMInfo info) {
-        Chunk task = (Chunk) info.parent.readObject(); // воркер читає дані
+        Task task = (Task) info.parent.readObject();
 
-        System.out.println("Worker started. Chunk length = " + task.textChunk.length());
-
-        Result res = new Result();
-        List<Integer> local = rabinKarpAll(task.textChunk, task.pattern);
-
-        for (int posInChunk : local) {
-            int globalPos = task.validStartOfChunk + posInChunk;
-            if (globalPos >= task.validStartOfChunk && globalPos <= task.validStartEndOfChunk) {
-                res.add(globalPos);
-            }
+        List<PatternResult> res = new ArrayList<>();
+        for (String p : task.patterns) {
+            List<Integer> inxs = getMatchesRabinKarp(p, task.text);
+            res.add(new PatternResult(p, inxs));
         }
-        info.parent.write(res); // воркер відправляє дані
+
+        info.parent.write(new Result(res));
     }
 
-    private static List<Integer> rabinKarpAll(String text, String pattern) {
-        List<Integer> occ = new ArrayList<>();
-        if (text == null || pattern == null) return occ;
+    public static List<Integer> getMatchesRabinKarp(String pattern, String text) {
+        List<Integer> occurrences = new ArrayList<>();
+        if (pattern == null || text == null) return occurrences;
 
-        int n = text.length();
-        int m = pattern.length();
-        if (m == 0 || m > n) return occ;
+        int patLen = pattern.length();
+        int txtLen = text.length();
+        if (patLen == 0 || patLen > txtLen) return occurrences;
 
-        final long q = 1_000_000_007L;
-        final long d = 256L;
+        int q = 101;
+        int d = 26;
 
         long h = 1;
-        for (int i = 0; i < m - 1; i++) h = (h * d) % q;
-
-        long pHash = 0;
-        long tHash = 0;
-
-        for (int i = 0; i < m; i++) {
-            pHash = (d * pHash + pattern.charAt(i)) % q;
-            tHash = (d * tHash + text.charAt(i)) % q;
+        for (int i = 0; i < patLen - 1; i++) {
+            h = (h * d) % q;
         }
 
-        for (int i = 0; i <= n - m; i++) {
-            if (pHash == tHash) {
-                int j = 0;
-                for (; j < m; j++) {
-                    if (text.charAt(i + j) != pattern.charAt(j)) break;
+        long patHash = 0;
+        long txtHash = 0;
+
+        for (int i = 0; i < patLen; i++) {
+            patHash = (d * patHash + pattern.charAt(i)) % q;
+            txtHash = (d * txtHash + text.charAt(i)) % q;
+        }
+
+        for (int i = 0; i <= txtLen - patLen; i++) {
+            if (patHash == txtHash) {
+                boolean ok = true;
+                for (int j = 0; j < patLen; j++) {
+                    if (text.charAt(i + j) != pattern.charAt(j)) {
+                        ok = false;
+                        break;
+                    }
                 }
-                if (j == m) occ.add(i);
+                if (ok) occurrences.add(i);
             }
 
-            if (i < n - m) {
-                long left = (text.charAt(i) * h) % q;
-                tHash = (d * ((tHash - left + q) % q) + text.charAt(i + m)) % q;
+            if (i < txtLen - patLen) {
+                txtHash = (d * (txtHash - text.charAt(i) * h) + text.charAt(i + patLen)) % q;
+                if (txtHash < 0) txtHash += q;
             }
         }
 
-        return occ;
+        return occurrences;
     }
 }
