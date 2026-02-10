@@ -6,6 +6,7 @@ import java.util.List;
 public class RabinKarp implements AM {
 
     public void run(AMInfo info) {
+        System.out.println("[BUILD STARTED] ");
         Task task = (Task) info.parent.readObject();
 
         List<PatternResult> res = new ArrayList<>();
@@ -14,6 +15,7 @@ public class RabinKarp implements AM {
             res.add(new PatternResult(p, inxs));
         }
 
+        System.out.println("[BUILD FINISHED] ");
         info.parent.write(new Result(res));
     }
 

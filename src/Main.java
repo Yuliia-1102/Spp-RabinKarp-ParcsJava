@@ -7,23 +7,23 @@ import java.util.*;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        if (args.length < 3) {
-            System.out.println("Please specify: <input_file> <output_file> <workers>.");
+        if (args.length < 2) {
+            System.out.println("Please specify: <input_file> <workers>.");
             return;
         }
 
         String inputFile = args[0];
-        String outputFile = args[1];
-        int workers = Integer.parseInt(args[2]);
+        int workers = Integer.parseInt(args[1]);
         int maxAvailableDaemons = 10;
+        String outputFile = "output.txt";
 
         List<String> lines = Files.readAllLines(Path.of(inputFile));
         List<String> strings = new ArrayList<>();
         for (String l : lines) strings.add(l.strip());
 
         if (strings.isEmpty()) {
-            Files.writeString(Path.of(outputFile), "");
             System.out.println("Empty input file.");
+            Files.writeString(Path.of(outputFile), "");
             return;
         }
 
@@ -31,12 +31,12 @@ public class Main {
         List<String> patterns = strings.subList(0, strings.size() - 1);
 
         if (patterns.isEmpty()) {
-            Files.writeString(Path.of(outputFile), "");
             System.out.println("No patterns to search.");
+            Files.writeString(Path.of(outputFile), "");
             return;
         }
 
-        workers = Math.max(1, Math.min(workers, patterns.size()));
+        workers = Math.max(1, Math.min(workers, patterns.size())); // щоб не було workers > patterns і без роботи не простоювалися
         workers = Math.min(workers, maxAvailableDaemons);
 
         task curtask = new task();
@@ -90,7 +90,6 @@ public class Main {
             }
             sb.append("\n\n");
         }
-
         Files.writeString(Path.of(outputFile), sb.toString());
 
         curtask.end();
