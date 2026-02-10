@@ -73,7 +73,7 @@ public class Main {
 
         long endTime = System.nanoTime();
         double timeParallel = (endTime - startTime) / 1e9;
-        System.out.println("Time with " + workers + " workers: " + timeParallel + " sec.");
+        System.out.println("Time of " + workers + " workers: " + timeParallel + " sec.");
 
         StringBuilder sb = new StringBuilder();
         for (PatternResult pr : allResults) {
